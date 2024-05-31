@@ -1,0 +1,20 @@
+{
+  "build": {
+    "dockerfile": "../build/package/Dockerfile"
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace/go-game-boy,type=bind,consistency=cached"
+  ],
+  "workspaceFolder": "/workspace/go-game-boy",
+  "containerEnv": {
+    "SHELL": "/bin/bash"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.Go",
+        "shardulm94.trailing-spaces"
+      ]
+    }
+  }
+}
