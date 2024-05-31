@@ -12,6 +12,7 @@ func NewBootrom(rom []uint8) *Bootrom {
 	}
 }
 
+// addr is the address of the memory map
 func (b *Bootrom) Read(addr uint16) uint8 {
 	return b.rom[addr]
 }
