@@ -16,9 +16,9 @@ func (b *Bootrom) IsActive() bool {
 	return b.active
 }
 
-// addr is the address of the memory map
-// Address range is 0x0000~0x00FF
-// Disabled by writing non-zero to 0xFF50
+// addr is the address of the memory map.
+// Address range is 0x0000~0x00FF.
+// Disabled by writing non-zero to 0xFF50.
 
 func (b *Bootrom) Read(addr uint16) uint8 {
 	if addr == 0xFF50 {
