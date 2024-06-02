@@ -24,13 +24,13 @@ func TestRead(t *testing.T) {
 func TestWrite(t *testing.T) {
 	bootrom := bootrom.NewBootrom([]uint8{0, 1, 2})
 
-	bootrom.Write(0, 0)
+	bootrom.Write(0xFF50, 0)
 	active := bootrom.IsActive()
 	if !active {
 		t.Errorf("Failed to update active state of bootrom.\n Expected value: %t\n Received value: %t\n", true, active)
 	}
 
-	bootrom.Write(0, 1)
+	bootrom.Write(0xFF50, 1)
 	active = bootrom.IsActive()
 	if active {
 		t.Errorf("Failed to update bootrom to inactive status\n Expected value: %t\n Received value: %t\n", false, active)
