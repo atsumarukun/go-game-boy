@@ -13,6 +13,12 @@ type registers struct {
 	pc uint16
 }
 
+func (r *registers) readPC() uint16 {
+	val := r.pc
+	r.pc += 1
+	return val
+}
+
 func (r *registers) readAF() uint16 {
 	return uint16(r.a)<<8 | uint16(r.f)
 }

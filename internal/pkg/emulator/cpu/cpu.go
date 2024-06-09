@@ -16,8 +16,7 @@ func (c *Cpu) Emulate(bus *bus.Bus) {
 }
 
 func (c *Cpu) fetch(bus *bus.Bus) {
-	c.ctx.opcode = bus.Read(c.regs.pc)
-	c.regs.pc += 1
+	c.ctx.opcode = bus.Read(c.regs.readPC())
 	c.ctx.isPrefixCB = false
 }
 
@@ -75,8 +74,7 @@ func (c *Cpu) read8(bus *bus.Bus, operand Operand8) *uint8 {
 	case DST_PC_8, DST_DST_PC_8, DST_DST_FF_PC_8:
 		switch c.ctx.operandStep {
 		case 0:
-			c.ctx.temp8 = bus.Read(c.regs.pc)
-			c.regs.pc += 1
+			c.ctx.temp8 = bus.Read(c.regs.readPC())
 			if operand == DST_PC_8 {
 				c.ctx.operandStep = 3
 			} else if operand == DST_DST_FF_PC_8 {
@@ -86,8 +84,7 @@ func (c *Cpu) read8(bus *bus.Bus, operand Operand8) *uint8 {
 				c.ctx.operandStep = 1
 			}
 		case 1:
-			c.ctx.temp16 = uint16(bus.Read(c.regs.pc))<<8 | uint16(c.ctx.temp8)
-			c.regs.pc += 1
+			c.ctx.temp16 = uint16(bus.Read(c.regs.readPC()))<<8 | uint16(c.ctx.temp8)
 			c.ctx.operandStep = 2
 		case 2:
 			c.ctx.temp8 = bus.Read(c.ctx.temp16)
@@ -146,8 +143,7 @@ func (c *Cpu) write8(bus *bus.Bus, operand Operand8, val uint8) {
 	case DST_DST_PC_8, DST_DST_FF_PC_8:
 		switch c.ctx.operandStep {
 		case 0:
-			c.ctx.temp8 = bus.Read(c.regs.pc)
-			c.regs.pc += 1
+			c.ctx.temp8 = bus.Read(c.regs.readPC())
 			if operand == DST_DST_FF_PC_8 {
 				c.ctx.temp16 = 0xFF00 | uint16(c.ctx.temp8)
 				c.ctx.operandStep = 2
@@ -155,8 +151,7 @@ func (c *Cpu) write8(bus *bus.Bus, operand Operand8, val uint8) {
 				c.ctx.operandStep = 1
 			}
 		case 1:
-			c.ctx.temp16 = uint16(bus.Read(c.regs.pc))<<8 | uint16(c.ctx.temp8)
-			c.regs.pc += 1
+			c.ctx.temp16 = uint16(bus.Read(c.regs.readPC()))<<8 | uint16(c.ctx.temp8)
 			c.ctx.operandStep = 2
 		case 2:
 			bus.Write(c.ctx.temp16, val)
@@ -188,12 +183,10 @@ func (c *Cpu) read16(bus *bus.Bus, operand Operand16) *uint16 {
 	case DST_PC_16:
 		switch c.ctx.operandStep {
 		case 0:
-			c.ctx.temp8 = bus.Read(c.regs.pc)
-			c.regs.pc += 1
+			c.ctx.temp8 = bus.Read(c.regs.readPC())
 			c.ctx.operandStep = 1
 		case 1:
-			c.ctx.temp16 = uint16(bus.Read(c.regs.pc))<<8 | uint16(c.ctx.temp8)
-			c.regs.pc += 1
+			c.ctx.temp16 = uint16(bus.Read(c.regs.readPC()))<<8 | uint16(c.ctx.temp8)
 			c.ctx.operandStep = 2
 		case 2:
 			c.ctx.operandStep = 0
@@ -220,12 +213,10 @@ func (c *Cpu) write16(bus *bus.Bus, operand Operand16, val uint16) {
 	case DST_DST_PC_16:
 		switch c.ctx.operandStep {
 		case 0:
-			c.ctx.temp8 = bus.Read(c.regs.pc)
-			c.regs.pc += 1
+			c.ctx.temp8 = bus.Read(c.regs.readPC())
 			c.ctx.operandStep = 1
 		case 1:
-			c.ctx.temp16 = uint16(bus.Read(c.regs.pc))<<8 | uint16(c.ctx.temp8)
-			c.regs.pc += 1
+			c.ctx.temp16 = uint16(bus.Read(c.regs.readPC()))<<8 | uint16(c.ctx.temp8)
 			c.ctx.operandStep = 2
 		case 2:
 			bus.Write(c.ctx.temp16, uint8(val))
