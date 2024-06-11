@@ -18,7 +18,7 @@ const (
 	DST_FF_C
 	DST_PC_8
 	DST_DST_PC_8
-	DST_DST_FF_PC_8
+	DST_FF_DST_PC_8
 )
 
 type Operand16 int
@@ -31,4 +31,14 @@ const (
 	REG_SP
 	DST_PC_16
 	DST_DST_PC_16
+)
+
+type Cond int
+
+const (
+	N  Cond = iota // Not conditions.
+	NZ             // Not Z flag.
+	Z              // Z flag.
+	NC             // Not C flag.
+	C              // C flag.
 )
