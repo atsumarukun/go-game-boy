@@ -705,268 +705,272 @@ func (c *Cpu) nop(bus *bus.Bus) {
 }
 
 func (c *Cpu) ld8(bus *bus.Bus, dst Operand8, src Operand8) {
-	val, ok := c.read8(bus, src)
-	if !ok {
-		return
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read8(bus, src); ok {
+			c.ctx.temp8 = *val
+			c.ctx.execStep = 1
+		}
 	}
-
-	if ok := c.write8(bus, dst, *val); !ok {
-		return
+	if c.ctx.execStep == 1 {
+		if ok := c.write8(bus, dst, c.ctx.temp8); ok {
+			c.ctx.execStep = 0
+			c.fetch(bus)
+		}
 	}
-
-	c.fetch(bus)
 }
 
 func (c *Cpu) ld16(bus *bus.Bus, dst Operand16, src Operand16) {
-	val, ok := c.read16(bus, src)
-	if !ok {
-		return
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read16(bus, src); ok {
+			c.ctx.temp16 = *val
+			c.ctx.execStep = 1
+		}
 	}
-
-	if ok := c.write16(bus, dst, *val); !ok {
-		return
+	if c.ctx.execStep == 1 {
+		if ok := c.write16(bus, dst, c.ctx.temp16); ok {
+			c.ctx.execStep = 0
+			c.fetch(bus)
+		}
 	}
-
-	c.fetch(bus)
 }
 
 func (c *Cpu) cp(bus *bus.Bus, src Operand8) {
-	val, ok := c.read8(bus, src)
-	if !ok {
-		return
+	if val, ok := c.read8(bus, src); ok {
+		c.regs.setZF(c.regs.a == *val) // c.regs.a - *val == 0
+		c.regs.setNF(true)
+		c.regs.setHF((c.regs.a & 0xF) < (*val & 0xF))
+		c.regs.setCF(c.regs.a < *val)
+
+		c.fetch(bus)
 	}
-
-	c.regs.setZF(c.regs.a == *val) // c.regs.a - *val == 0
-	c.regs.setNF(true)
-	c.regs.setHF((c.regs.a & 0xF) < (*val & 0xF))
-	c.regs.setCF(c.regs.a < *val)
-
-	c.fetch(bus)
 }
 
 func (c *Cpu) inc8(bus *bus.Bus, src Operand8) {
-	val, ok := c.read8(bus, src)
-	if !ok {
-		return
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read8(bus, src); ok {
+			c.ctx.temp8 = *val + 1
+			c.regs.setZF(c.ctx.temp8 == 0)
+			c.regs.setNF(false)
+			c.regs.setHF(*val&0xF == 0xF)
+
+			c.ctx.execStep = 1
+		}
 	}
-
-	result := *val + 1
-
-	c.regs.setZF(result == 0)
-	c.regs.setNF(false)
-	c.regs.setHF(*val&0xF == 0xF)
-
-	if ok := c.write8(bus, src, result); !ok {
-		return
+	if c.ctx.execStep == 1 {
+		if ok := c.write8(bus, src, c.ctx.temp8); ok {
+			c.ctx.execStep = 0
+			c.fetch(bus)
+		}
 	}
-
-	c.fetch(bus)
 }
 
+// Number of cycles is the number of memory accesses + 1.
 func (c *Cpu) inc16(bus *bus.Bus, src Operand16) {
-	switch c.ctx.execStep {
-	case 0:
-		val, ok := c.read16(bus, src)
-		if !ok {
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read16(bus, src); ok {
+			c.ctx.temp16 = *val + 1
+			c.ctx.execStep = 1
 			return
 		}
-
-		if ok := c.write16(bus, src, *val+1); !ok {
-			return
+	}
+	if c.ctx.execStep == 1 {
+		if ok := c.write16(bus, src, c.ctx.temp16); ok {
+			c.ctx.execStep = 0
+			c.fetch(bus)
 		}
-
-		c.ctx.execStep = 1
-	case 1:
-		c.ctx.execStep = 0
-		c.fetch(bus)
 	}
 }
 
 func (c *Cpu) dec8(bus *bus.Bus, src Operand8) {
-	val, ok := c.read8(bus, src)
-	if !ok {
-		return
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read8(bus, src); ok {
+			c.ctx.temp8 = *val - 1
+			c.regs.setZF(c.ctx.temp8 == 0)
+			c.regs.setNF(true)
+			c.regs.setHF(*val&0xF == 0)
+
+			c.ctx.execStep = 1
+		}
 	}
-
-	result := *val - 1
-
-	c.regs.setZF(result == 0)
-	c.regs.setNF(true)
-	c.regs.setHF(*val&0xF == 0)
-
-	if ok := c.write8(bus, src, result); !ok {
-		return
+	if c.ctx.execStep == 1 {
+		if ok := c.write8(bus, src, c.ctx.temp8); ok {
+			c.ctx.execStep = 0
+			c.fetch(bus)
+		}
 	}
-
-	c.fetch(bus)
 }
 
+// Number of cycles is the number of memory accesses + 1.
 func (c *Cpu) dec16(bus *bus.Bus, src Operand16) {
-	switch c.ctx.execStep {
-	case 0:
-		val, ok := c.read16(bus, src)
-		if !ok {
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read16(bus, src); ok {
+			c.ctx.temp16 = *val - 1
+			c.ctx.execStep = 1
 			return
 		}
-
-		if ok := c.write16(bus, src, *val-1); !ok {
-			return
+	}
+	if c.ctx.execStep == 1 {
+		if ok := c.write16(bus, src, c.ctx.temp16); ok {
+			c.ctx.execStep = 0
+			c.fetch(bus)
 		}
-
-		c.ctx.execStep = 1
-	case 1:
-		c.ctx.execStep = 0
-		c.fetch(bus)
 	}
 }
 
 func (c *Cpu) rl(bus *bus.Bus, src Operand8) {
-	val, ok := c.read8(bus, src)
-	if !ok {
-		return
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read8(bus, src); ok {
+			c.ctx.temp8 = (*val << 1) | converter.BoolToUint[uint8](c.regs.getCF())
+			c.regs.setZF(c.ctx.temp8 == 0)
+			c.regs.setNF(false)
+			c.regs.setHF(false)
+			c.regs.setCF(*val > 0x80) // The 7th bit is 1.
+
+			c.ctx.execStep = 1
+		}
 	}
-
-	result := (*val << 1) | converter.BoolToUint8(c.regs.getCF())
-
-	c.regs.setZF(result == 0)
-	c.regs.setNF(false)
-	c.regs.setHF(false)
-	c.regs.setCF(*val > 0x80) // The 7th bit is 1.
-
-	if ok := c.write8(bus, src, result); !ok {
-		return
+	if c.ctx.execStep == 1 {
+		if ok := c.write8(bus, src, c.ctx.temp8); ok {
+			c.ctx.execStep = 0
+			c.fetch(bus)
+		}
 	}
-
-	c.fetch(bus)
 }
 
 func (c *Cpu) bit(bus *bus.Bus, bit uint8, src Operand8) {
-	val, ok := c.read8(bus, src)
-	if !ok {
-		return
+	if val, ok := c.read8(bus, src); ok {
+		c.regs.setZF(*val&(1<<bit) == 0)
+		c.regs.setNF(false)
+		c.regs.setHF(true)
+
+		c.fetch(bus)
 	}
-
-	c.regs.setZF(*val&(1<<bit) == 0)
-	c.regs.setNF(false)
-	c.regs.setHF(true)
-
-	c.fetch(bus)
 }
 
 func (c *Cpu) push(bus *bus.Bus, src Operand16) {
-	switch c.ctx.execStep {
-	case 0:
-		val, ok := c.read16(bus, src)
-		if !ok {
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read16(bus, src); ok {
+			c.ctx.temp16 = *val
+			c.ctx.execStep = 1
 			return
 		}
-
-		c.ctx.temp16 = *val
-		c.ctx.execStep = 1
-	case 1:
+	}
+	if c.ctx.execStep == 1 {
 		c.regs.sp -= 1
 		bus.Write(c.regs.sp, uint8(c.ctx.temp16>>8))
-
 		c.ctx.temp8 = uint8(c.ctx.temp16)
+
 		c.ctx.execStep = 2
-	case 2:
+		return
+	}
+	if c.ctx.execStep == 2 {
 		c.regs.sp -= 1
 		bus.Write(c.regs.sp, c.ctx.temp8)
 
 		c.ctx.execStep = 3
-	case 3:
+		return
+	}
+	if c.ctx.execStep == 3 {
 		c.ctx.execStep = 0
 		c.fetch(bus)
 	}
 }
 
 func (c *Cpu) pop(bus *bus.Bus, dst Operand16) {
-	switch c.ctx.execStep {
-	case 0:
+	if c.ctx.execStep == 0 {
 		c.ctx.temp8 = bus.Read(c.regs.sp)
 		c.regs.sp += 1
 
 		c.ctx.execStep = 1
-	case 1:
+		return
+	}
+	if c.ctx.execStep == 1 {
 		c.ctx.temp16 = uint16(bus.Read(c.regs.sp))<<8 | uint16(c.ctx.temp8)
 		c.regs.sp += 1
 
 		c.ctx.execStep = 2
-	case 2:
-		c.write16(bus, dst, c.ctx.temp16)
-
-		c.ctx.execStep = 0
-		c.fetch(bus)
+		return
+	}
+	if c.ctx.execStep == 2 {
+		if ok := c.write16(bus, dst, c.ctx.temp16); ok {
+			c.ctx.execStep = 0
+			c.fetch(bus)
+		}
 	}
 }
 
 func (c *Cpu) jr(bus *bus.Bus, cond Cond) {
-	switch c.ctx.execStep {
-	case 0:
-		val, ok := c.read8(bus, DST_PC_8)
-		if !ok {
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read8(bus, DST_PC_8); ok {
+			if cond != N && !c.cond(cond) {
+				c.fetch(bus)
+				return
+			}
+			c.regs.pc += uint16(int8(*val)) // Add signed integers.
+
+			c.ctx.execStep = 1
 			return
 		}
-
-		if cond != N && !c.cond(cond) {
-			c.fetch(bus)
-		}
-
-		c.regs.pc += uint16(int8(*val)) // Add signed integers.
-
-		c.ctx.execStep = 1
-	case 1:
+	}
+	if c.ctx.execStep == 1 {
 		c.ctx.execStep = 0
 		c.fetch(bus)
 	}
 }
 
+// Number of cycles is the number of memory accesses + 1.
 func (c *Cpu) call(bus *bus.Bus) {
-	switch c.ctx.execStep {
-	case 0:
-		val, ok := c.read16(bus, DST_PC_16)
-		if !ok {
+	if c.ctx.execStep == 0 {
+		if val, ok := c.read16(bus, DST_PC_16); ok {
+			c.ctx.temp16 = *val
+			c.ctx.execStep = 1
 			return
 		}
-
-		c.ctx.temp16 = *val
-		c.ctx.execStep = 1
-	case 1:
+	}
+	if c.ctx.execStep == 1 {
 		c.regs.sp -= 1
-		bus.Write(c.regs.sp, uint8(c.ctx.temp16>>8))
+		bus.Write(c.regs.sp, uint8(c.regs.pc>>8))
+		c.ctx.temp8 = uint8(c.regs.pc)
 
-		c.ctx.temp8 = uint8(c.ctx.temp16)
 		c.ctx.execStep = 2
-	case 2:
+		return
+	}
+	if c.ctx.execStep == 2 {
 		c.regs.sp -= 1
 		bus.Write(c.regs.sp, c.ctx.temp8)
 
 		c.ctx.execStep = 3
-	case 3:
+		return
+	}
+	if c.ctx.execStep == 3 {
 		c.regs.pc = c.ctx.temp16
-
-		c.ctx.operandStep = 0
+		c.ctx.execStep = 0
 		c.fetch(bus)
 	}
 }
 
+// Number of cycles is the number of memory accesses + 1.
 func (c *Cpu) ret(bus *bus.Bus) {
-	switch c.ctx.execStep {
-	case 0:
+	if c.ctx.execStep == 0 {
 		c.ctx.temp8 = bus.Read(c.regs.sp)
 		c.regs.sp += 1
 
 		c.ctx.execStep = 1
-	case 1:
+		return
+	}
+	if c.ctx.execStep == 1 {
 		c.ctx.temp16 = uint16(bus.Read(c.regs.sp))<<8 | uint16(c.ctx.temp8)
 		c.regs.sp += 1
 
 		c.ctx.execStep = 2
-	case 2:
+		return
+	}
+	if c.ctx.execStep == 2 {
 		c.regs.pc = c.ctx.temp16
-
 		c.ctx.execStep = 3
-	case 3:
+		return
+	}
+	if c.ctx.execStep == 3 {
 		c.ctx.execStep = 0
 		c.fetch(bus)
 	}

@@ -1,6 +1,6 @@
 package converter
 
-func BoolToUint8(val bool) uint8 {
+func BoolToUint[T uint8 | uint16](val bool) T {
 	if val {
 		return 1
 	}
