@@ -1,5 +1,7 @@
 package vram
 
+const VRAM_ADDR uint16 = 0x8000
+
 // type Vram [0x2000]uint8 can be operated externally.
 type Vram struct {
 	ram [0x2000]uint8

@@ -1,7 +1,7 @@
 package bootrom
 
 type Bootrom struct {
-	rom []uint8
+	rom    []uint8
 	active bool
 }
 
