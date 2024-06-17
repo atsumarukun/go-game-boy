@@ -1,9 +1,10 @@
 package ppu
 
 const (
-	BG_WINDOW_ENABLE uint8 = 1 << 0
-	BG_TILE_MAP      uint8 = 1 << 3
-	PPU_ENABLE uint8 = 1 << 7
+	BG_WINDOW_ENABLE          uint8 = 1 << 0
+	BG_TILE_MAP               uint8 = 1 << 3
+	TILE_DATA_ADDRESSING_MODE uint8 = 1 << 4
+	PPU_ENABLE                uint8 = 1 << 7
 )
 
 const LYC_EQ_LY uint8 = 1 << 2

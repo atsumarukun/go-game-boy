@@ -149,7 +149,13 @@ func (p *Ppu) renderBg(bus *bus.Bus) {
 		x := uint8(i) + p.regs.scx
 
 		tileMapAddr := 0x1800 | (converter.BoolToUint[uint16](p.regs.lcdc&BG_TILE_MAP > 0) << 10)
-		index := bus.Read(vram.VRAM_ADDR|tileMapAddr|(uint16(y>>3)<<5)|uint16(x>>3)) << 4
+		val := bus.Read(vram.VRAM_ADDR | tileMapAddr | ((uint16(y>>3) << 5) + uint16(x>>3)))
+		var index uint
+		if p.regs.lcdc&TILE_DATA_ADDRESSING_MODE > 0 {
+			index = uint(val)
+		} else {
+			index = uint(uint16(uint8(val)) + 0x100)
+		}
 
 		row := uint16((y & 7) * 2)
 		col := uint16(7 - (x & 7))
