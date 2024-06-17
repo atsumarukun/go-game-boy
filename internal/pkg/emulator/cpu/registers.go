@@ -56,19 +56,19 @@ func (r *registers) writeHL(val uint16) {
 }
 
 func (r *registers) getZF() bool {
-	return (r.f >> 7) == 1
+	return r.f&0b_1000_0000 > 0
 }
 
 func (r *registers) getNF() bool {
-	return (r.f >> 6) == 1
+	return r.f&0b_0100_0000 > 0
 }
 
 func (r *registers) getHF() bool {
-	return (r.f >> 5) == 1
+	return r.f&0b_0010_0000 > 0
 }
 
 func (r *registers) getCF() bool {
-	return (r.f >> 4) == 1
+	return r.f&0b_0001_0000 > 0
 }
 
 func (r *registers) setZF(val bool) {

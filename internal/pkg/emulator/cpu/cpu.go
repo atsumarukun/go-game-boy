@@ -824,7 +824,7 @@ func (c *Cpu) rl(bus *bus.Bus, src Operand8) {
 			c.regs.setZF(c.ctx.exec.temp8 == 0)
 			c.regs.setNF(false)
 			c.regs.setHF(false)
-			c.regs.setCF(*val > 0x80) // The 7th bit is 1.
+			c.regs.setCF(*val >= 0x80) // The 7th bit is 1.
 
 			c.ctx.exec.step = 1
 		}
