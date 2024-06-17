@@ -3,11 +3,13 @@
     "dockerfile": "../build/package/Dockerfile"
   },
   "mounts": [
-    "source=${localWorkspaceFolder},target=/workspace/go-game-boy,type=bind,consistency=cached"
+    "source=${localWorkspaceFolder},target=/workspace/go-game-boy,type=bind,consistency=cached",
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
   ],
   "workspaceFolder": "/workspace/go-game-boy",
   "containerEnv": {
-    "SHELL": "/bin/bash"
+    "SHELL": "/bin/bash",
+    "DISPLAY": ":0.0"
   },
   "customizations": {
     "vscode": {
