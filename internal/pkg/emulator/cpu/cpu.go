@@ -1,8 +1,8 @@
 package cpu
 
 import (
-	"go-game-boy/internal/pkg/emulator/bus"
-	"go-game-boy/internal/pkg/util/converter"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/util/converter"
 )
 
 type Cpu struct {

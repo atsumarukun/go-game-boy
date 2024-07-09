@@ -1,9 +1,9 @@
 package emulator
 
 import (
-	"go-game-boy/internal/pkg/emulator/bus"
-	"go-game-boy/internal/pkg/emulator/cpu"
-	"go-game-boy/internal/pkg/emulator/ppu"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/cpu"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/ppu"
 	"time"
 )
 

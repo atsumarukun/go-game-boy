@@ -1,8 +1,8 @@
 package native
 
 import (
-	gogameboy "go-game-boy"
-	"go-game-boy/internal/app/native/lcd"
+	gogameboy "github.com/atsumarukun/go-game-boy"
+	"github.com/atsumarukun/go-game-boy/internal/app/native/lcd"
 	"os"
 )
 

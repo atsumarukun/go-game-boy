@@ -1,15 +1,15 @@
 package gogameboy
 
 import (
-	"go-game-boy/internal/pkg/emulator"
-	"go-game-boy/internal/pkg/emulator/bootrom"
-	"go-game-boy/internal/pkg/emulator/bus"
-	"go-game-boy/internal/pkg/emulator/cpu"
-	"go-game-boy/internal/pkg/emulator/hram"
-	"go-game-boy/internal/pkg/emulator/oam"
-	"go-game-boy/internal/pkg/emulator/ppu"
-	"go-game-boy/internal/pkg/emulator/vram"
-	"go-game-boy/internal/pkg/emulator/wram"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bootrom"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/cpu"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/hram"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/oam"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/ppu"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/vram"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/wram"
 	"os"
 )
 

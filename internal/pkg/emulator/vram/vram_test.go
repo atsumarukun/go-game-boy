@@ -1,7 +1,7 @@
 package vram_test
 
 import (
-	"go-game-boy/internal/pkg/emulator/vram"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/vram"
 	"testing"
 )
 

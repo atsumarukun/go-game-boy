@@ -1,7 +1,7 @@
 package oam_test
 
 import (
-	"go-game-boy/internal/pkg/emulator/oam"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/oam"
 	"testing"
 )
 

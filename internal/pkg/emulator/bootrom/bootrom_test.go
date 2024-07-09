@@ -1,7 +1,7 @@
 package bootrom_test
 
 import (
-	"go-game-boy/internal/pkg/emulator/bootrom"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bootrom"
 	"testing"
 )
 

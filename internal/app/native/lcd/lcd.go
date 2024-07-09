@@ -1,7 +1,7 @@
 package lcd
 
 import (
-	"go-game-boy/internal/pkg/emulator/ppu"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/ppu"
 	"unsafe"
 
 	"github.com/veandco/go-sdl2/sdl"

@@ -1,7 +1,7 @@
 package cpu_test
 
 import (
-	"go-game-boy/internal/pkg/emulator/cpu"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/cpu"
 	"testing"
 )
 

@@ -1,7 +1,7 @@
 package hram_test
 
 import (
-	"go-game-boy/internal/pkg/emulator/hram"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/hram"
 	"testing"
 )
 

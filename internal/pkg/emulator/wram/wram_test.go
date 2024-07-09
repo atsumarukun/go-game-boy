@@ -1,7 +1,7 @@
 package wram_test
 
 import (
-	"go-game-boy/internal/pkg/emulator/wram"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/wram"
 	"testing"
 )
 

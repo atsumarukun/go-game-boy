@@ -1,4 +1,4 @@
-module go-game-boy
+module github.com/atsumarukun/go-game-boy
 
 go 1.22.3
 

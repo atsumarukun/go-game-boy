@@ -1,9 +1,9 @@
 package ppu
 
 import (
-	"go-game-boy/internal/pkg/emulator/bus"
-	"go-game-boy/internal/pkg/emulator/vram"
-	"go-game-boy/internal/pkg/util/converter"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/vram"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/util/converter"
 )
 
 const (
