@@ -1,20 +1,21 @@
-package oam_test
+package io_test
 
 import (
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/oam"
 	"testing"
+
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus/io"
 )
 
-func TestRead(t *testing.T) {
-	oam := oam.NewOam()
+func TestOamRead(t *testing.T) {
+	oam := io.NewOam()
 	val := oam.Read(0)
 	if val != 0 {
 		t.Errorf("Failed to read oam.\n Expected value: %d\n Received value: %d\n", 0, val)
 	}
 }
 
-func TestWrite(t *testing.T) {
-	oam := oam.NewOam()
+func TestOamWrite(t *testing.T) {
+	oam := io.NewOam()
 	oam.Write(0, 1)
 	val := oam.Read(0)
 	if val != 1 {

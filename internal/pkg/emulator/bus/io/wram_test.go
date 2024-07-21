@@ -1,20 +1,21 @@
-package wram_test
+package io_test
 
 import (
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/wram"
 	"testing"
+
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus/io"
 )
 
-func TestRead(t *testing.T) {
-	wram := wram.NewWram()
+func TestWramRead(t *testing.T) {
+	wram := io.NewWram()
 	val := wram.Read(0)
 	if val != 0 {
 		t.Errorf("Failed to read wram.\n Expected value: %d\n Received value: %d\n", 0, val)
 	}
 }
 
-func TestWrite(t *testing.T) {
-	wram := wram.NewWram()
+func TestWramWrite(t *testing.T) {
+	wram := io.NewWram()
 	wram.Write(0, 1)
 	val := wram.Read(0)
 	if val != 1 {

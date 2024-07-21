@@ -1,17 +1,14 @@
 package bus_test
 
 import (
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bootrom"
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus"
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/hram"
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/oam"
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/vram"
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/wram"
 	"testing"
+
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus/io"
 )
 
 func TestReadBootrom(t *testing.T) {
-	bootrom := bootrom.NewBootrom([]uint8{0, 1, 2})
+	bootrom := io.NewBootrom([]uint8{0, 1, 2})
 	bus := bus.NewBus(bootrom, nil, nil, nil, nil, nil)
 	val := bus.Read(1)
 	if val != 1 {
@@ -20,7 +17,7 @@ func TestReadBootrom(t *testing.T) {
 }
 
 func TestWriteBootrom(t *testing.T) {
-	bootrom := bootrom.NewBootrom([]uint8{0, 1, 2})
+	bootrom := io.NewBootrom([]uint8{0, 1, 2})
 	bus := bus.NewBus(bootrom, nil, nil, nil, nil, nil)
 	bus.Write(0xFF50, 1)
 	active := bootrom.IsActive()
@@ -30,7 +27,7 @@ func TestWriteBootrom(t *testing.T) {
 }
 
 func TestReadVram(t *testing.T) {
-	vram := vram.NewVram()
+	vram := io.NewVram()
 	bus := bus.NewBus(nil, vram, nil, nil, nil, nil)
 	val := bus.Read(0x8000)
 	if val != 0 {
@@ -39,7 +36,7 @@ func TestReadVram(t *testing.T) {
 }
 
 func TestWriteVram(t *testing.T) {
-	vram := vram.NewVram()
+	vram := io.NewVram()
 	bus := bus.NewBus(nil, vram, nil, nil, nil, nil)
 	bus.Write(0x8000, 1)
 	val := bus.Read(0x8000)
@@ -49,7 +46,7 @@ func TestWriteVram(t *testing.T) {
 }
 
 func TestReadWram(t *testing.T) {
-	wram := wram.NewWram()
+	wram := io.NewWram()
 	bus := bus.NewBus(nil, nil, wram, nil, nil, nil)
 	val := bus.Read(0xC000)
 	if val != 0 {
@@ -58,7 +55,7 @@ func TestReadWram(t *testing.T) {
 }
 
 func TestWriteWram(t *testing.T) {
-	wram := wram.NewWram()
+	wram := io.NewWram()
 	bus := bus.NewBus(nil, nil, wram, nil, nil, nil)
 	bus.Write(0xC000, 1)
 	val := bus.Read(0xC000)
@@ -68,7 +65,7 @@ func TestWriteWram(t *testing.T) {
 }
 
 func TestReadHram(t *testing.T) {
-	hram := hram.NewHram()
+	hram := io.NewHram()
 	bus := bus.NewBus(nil, nil, nil, hram, nil, nil)
 	val := bus.Read(0xFF80)
 	if val != 0 {
@@ -77,7 +74,7 @@ func TestReadHram(t *testing.T) {
 }
 
 func TestWriteHram(t *testing.T) {
-	hram := hram.NewHram()
+	hram := io.NewHram()
 	bus := bus.NewBus(nil, nil, nil, hram, nil, nil)
 	bus.Write(0xFF80, 1)
 	val := bus.Read(0xFF80)
@@ -87,7 +84,7 @@ func TestWriteHram(t *testing.T) {
 }
 
 func TestReadOam(t *testing.T) {
-	oam := oam.NewOam()
+	oam := io.NewOam()
 	bus := bus.NewBus(nil, nil, nil, nil, oam, nil)
 	val := bus.Read(0xFE00)
 	if val != 0 {
@@ -96,7 +93,7 @@ func TestReadOam(t *testing.T) {
 }
 
 func TestWriteOam(t *testing.T) {
-	oam := oam.NewOam()
+	oam := io.NewOam()
 	bus := bus.NewBus(nil, nil, nil, nil, oam, nil)
 	bus.Write(0xFE00, 1)
 	val := bus.Read(0xFE00)

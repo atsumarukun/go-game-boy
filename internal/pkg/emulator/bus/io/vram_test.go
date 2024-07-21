@@ -1,20 +1,21 @@
-package vram_test
+package io_test
 
 import (
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/vram"
 	"testing"
+
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus/io"
 )
 
-func TestRead(t *testing.T) {
-	vram := vram.NewVram()
+func TestVramRead(t *testing.T) {
+	vram := io.NewVram()
 	val := vram.Read(0)
 	if val != 0 {
 		t.Errorf("Failed to read vram.\n Expected value: %d\n Received value: %d\n", 0, val)
 	}
 }
 
-func TestWrite(t *testing.T) {
-	vram := vram.NewVram()
+func TestVramWrite(t *testing.T) {
+	vram := io.NewVram()
 	vram.Write(0, 1)
 	val := vram.Read(0)
 	if val != 1 {

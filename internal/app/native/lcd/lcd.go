@@ -1,8 +1,9 @@
 package lcd
 
 import (
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/ppu"
 	"unsafe"
+
+	gogameboy "github.com/atsumarukun/go-game-boy"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -17,7 +18,7 @@ func NewLcd() *Lcd {
 		panic(err)
 	}
 
-	window, err := sdl.CreateWindow("GoGameBoy", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, ppu.WIDTH*4, ppu.HEIGHT*4, sdl.WINDOW_SHOWN)
+	window, err := sdl.CreateWindow("GoGameBoy", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, gogameboy.LCD_WIDTH*4, gogameboy.LCD_HEIGHT*4, sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +28,7 @@ func NewLcd() *Lcd {
 		panic(err)
 	}
 
-	texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB24, sdl.TEXTUREACCESS_STREAMING, ppu.WIDTH, ppu.HEIGHT)
+	texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB24, sdl.TEXTUREACCESS_STREAMING, gogameboy.LCD_WIDTH, gogameboy.LCD_HEIGHT)
 	if err != nil {
 		panic(err)
 	}
@@ -38,8 +39,8 @@ func NewLcd() *Lcd {
 	}
 }
 
-func (l *Lcd) Render(buffer [ppu.WIDTH * ppu.HEIGHT]uint8) {
-	var buf [ppu.WIDTH * ppu.HEIGHT * 3]byte
+func (l *Lcd) Render(buffer [gogameboy.LCD_WIDTH * gogameboy.LCD_HEIGHT]uint8) {
+	var buf [gogameboy.LCD_WIDTH * gogameboy.LCD_HEIGHT * 3]byte
 	for i, v := range buffer {
 		for j := 0; j < 3; j++ {
 			buf[i*3+j] = v

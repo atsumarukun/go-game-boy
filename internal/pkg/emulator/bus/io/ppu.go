@@ -1,35 +1,71 @@
-package ppu
+package io
 
 import (
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus"
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/vram"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/lcd"
 	"github.com/atsumarukun/go-game-boy/internal/pkg/util/converter"
 )
 
+
+
 const (
-	WIDTH  = 160
-	HEIGHT = 144
+	BG_WINDOW_ENABLE          uint8 = 1 << 0
+	BG_TILE_MAP               uint8 = 1 << 3
+	TILE_DATA_ADDRESSING_MODE uint8 = 1 << 4
+	PPU_ENABLE                uint8 = 1 << 7
 )
 
-type Ppu struct {
-	regs   registers
-	ctx    context
-	buffer [WIDTH * HEIGHT]uint8
+const LYC_EQ_LY uint8 = 1 << 2
+
+type registers struct {
+	lcdc uint8
+	stat uint8
+	scy  uint8
+	scx  uint8
+	ly   uint8
+	lyc  uint8
+	bgp  uint8
+	obp0 uint8
+	obp1 uint8
+	wy   uint8
+	wx   uint8
 }
 
-func NewPpu() *Ppu {
-	return &Ppu{
+type Mode int
+
+const (
+	HBLANK Mode = iota
+	VBLANK
+	OAM_SCAN
+	DRAWING
+)
+
+type context struct {
+	mode Mode
+	cycle uint8
+}
+
+type Ppu interface {
+	Read(uint16) uint8
+	Write(uint16, uint8)
+	Buffer() [lcd.WIDTH * lcd.HEIGHT]uint8
+	Emulate(Vram) bool
+}
+
+type ppu struct {
+	regs   registers
+	ctx    context
+	buffer [lcd.WIDTH * lcd.HEIGHT]uint8
+}
+
+func NewPpu() Ppu {
+	return &ppu{
 		ctx: context{
 			mode: OAM_SCAN,
 		},
 	}
 }
 
-func (p *Ppu) Buffer() [WIDTH * HEIGHT]uint8 {
-	return p.buffer
-}
-
-func (p *Ppu) Read(addr uint16) uint8 {
+func (p *ppu) Read(addr uint16) uint8 {
 	switch addr {
 	case 0xFF40:
 		return p.regs.lcdc
@@ -58,7 +94,7 @@ func (p *Ppu) Read(addr uint16) uint8 {
 	}
 }
 
-func (p *Ppu) Write(addr uint16, val uint8) {
+func (p *ppu) Write(addr uint16, val uint8) {
 	switch addr {
 	case 0xFF40:
 		p.regs.lcdc = val
@@ -87,7 +123,11 @@ func (p *Ppu) Write(addr uint16, val uint8) {
 	}
 }
 
-func (p *Ppu) Emulate(bus *bus.Bus) bool {
+func (p *ppu) Buffer() [lcd.WIDTH * lcd.HEIGHT]uint8 {
+	return p.buffer
+}
+
+func (p *ppu) Emulate(vram Vram) bool {
 	if p.regs.lcdc&PPU_ENABLE == 0 {
 		return false
 	}
@@ -124,14 +164,14 @@ func (p *Ppu) Emulate(bus *bus.Bus) bool {
 		p.ctx.mode = DRAWING
 		p.ctx.cycle = 43
 	case DRAWING:
-		p.renderBg(bus)
+		p.renderBg(vram)
 		p.ctx.mode = HBLANK
 		p.ctx.cycle = 51
 	}
 	return rendered
 }
 
-func (p *Ppu) checkLycEqLy() {
+func (p *ppu) checkLycEqLy() {
 	if p.regs.ly == p.regs.lyc {
 		p.regs.stat |= LYC_EQ_LY
 	} else {
@@ -139,17 +179,17 @@ func (p *Ppu) checkLycEqLy() {
 	}
 }
 
-func (p *Ppu) renderBg(bus *bus.Bus) {
+func (p *ppu) renderBg(vram Vram) {
 	if p.regs.lcdc&BG_WINDOW_ENABLE == 0 {
 		return
 	}
 
 	y := p.regs.ly + p.regs.scy
-	for i := 0; i < WIDTH; i++ {
+	for i := 0; i < lcd.WIDTH; i++ {
 		x := uint8(i) + p.regs.scx
 
 		tileMapAddr := 0x1800 | (converter.BoolToUint[uint16](p.regs.lcdc&BG_TILE_MAP > 0) << 10)
-		val := bus.Read(vram.VRAM_ADDR | tileMapAddr | ((uint16(y>>3) << 5) + uint16(x>>3)))
+		val := vram.Read(tileMapAddr | ((uint16(y>>3) << 5) + uint16(x>>3)))
 		var index uint
 		if p.regs.lcdc&TILE_DATA_ADDRESSING_MODE > 0 {
 			index = uint(val)
@@ -161,19 +201,19 @@ func (p *Ppu) renderBg(bus *bus.Bus) {
 		col := uint16(7 - (x & 7))
 		addr := uint16(index) << 4
 
-		low := bus.Read(vram.VRAM_ADDR | addr | row)
-		high := bus.Read(vram.VRAM_ADDR | addr | (row + 1))
+		low := vram.Read(addr | row)
+		high := vram.Read(addr | (row + 1))
 
 		pixel := (((high >> col) & 1) << 1) | ((low >> col) & 1)
 		switch (p.regs.bgp >> (pixel << 1)) & 0b11 {
 		case 0b00:
-			p.buffer[uint(WIDTH)*uint(p.regs.ly)+uint(i)] = 0xFF
+			p.buffer[uint(lcd.WIDTH)*uint(p.regs.ly)+uint(i)] = 0xFF
 		case 0b01:
-			p.buffer[uint(WIDTH)*uint(p.regs.ly)+uint(i)] = 0xAA
+			p.buffer[uint(lcd.WIDTH)*uint(p.regs.ly)+uint(i)] = 0xAA
 		case 0b10:
-			p.buffer[uint(WIDTH)*uint(p.regs.ly)+uint(i)] = 0x55
+			p.buffer[uint(lcd.WIDTH)*uint(p.regs.ly)+uint(i)] = 0x55
 		default:
-			p.buffer[uint(WIDTH)*uint(p.regs.ly)+uint(i)] = 0x00
+			p.buffer[uint(lcd.WIDTH)*uint(p.regs.ly)+uint(i)] = 0x00
 		}
 	}
 }

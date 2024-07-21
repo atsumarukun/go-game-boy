@@ -1,10 +1,12 @@
 package emulator
 
 import (
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus"
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/cpu"
-	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/ppu"
 	"time"
+
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus/io"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/cpu"
+	"github.com/atsumarukun/go-game-boy/internal/pkg/emulator/lcd"
 )
 
 const (
@@ -13,27 +15,36 @@ const (
 	M_CYCLE_NANOS uint = M_CYCLE_CLOCK * 1_000_000_000 / CPU_CLOCK_HZ
 )
 
-type Lcd interface {
-	Render([ppu.WIDTH * ppu.HEIGHT]uint8)
+type Emulator interface {
+	Emulate()
 }
 
-type Emulator struct {
+type emulator struct {
 	cpu *cpu.Cpu
-	ppu *ppu.Ppu
-	bus *bus.Bus
-	lcd Lcd
+	bus bus.Bus
+	lcd lcd.Lcd
 }
 
-func NewEmulator(cpu *cpu.Cpu, ppu *ppu.Ppu, bus *bus.Bus, lcd Lcd) *Emulator {
-	return &Emulator{
+func Init(bootromBody []byte, lcd lcd.Lcd) Emulator {
+	cpu := cpu.NewCpu()
+	ppu := io.NewPpu()
+
+	bootrom := io.NewBootrom(bootromBody)
+	vram := io.NewVram()
+	wram := io.NewWram()
+	hram := io.NewHram()
+	oam := io.NewOam()
+
+	bus := bus.NewBus(bootrom, vram, wram, hram, oam, ppu)
+
+	return &emulator{
 		cpu,
-		ppu,
 		bus,
 		lcd,
 	}
 }
 
-func (e *Emulator) Emulate() {
+func (e *emulator) Emulate() {
 	start := time.Now()
 	elapsed := 0
 
@@ -41,8 +52,8 @@ func (e *Emulator) Emulate() {
 		ela := time.Since(start)
 		for i := 0; i < int(ela-time.Duration(elapsed)); i++ {
 			e.cpu.Emulate(e.bus)
-			if e.ppu.Emulate(e.bus) {
-				e.lcd.Render(e.ppu.Buffer())
+			if e.bus.Ppu().Emulate(e.bus.Vram()) {
+				e.lcd.Render(e.bus.Ppu().Buffer())
 			}
 			elapsed += int(M_CYCLE_NANOS)
 		}

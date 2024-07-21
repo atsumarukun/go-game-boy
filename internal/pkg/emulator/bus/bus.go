@@ -1,29 +1,25 @@
 package bus
 
-type Io interface {
-	Read(addr uint16) uint8
-	Write(addr uint16, val uint8)
+import "github.com/atsumarukun/go-game-boy/internal/pkg/emulator/bus/io"
+
+type Bus interface {
+	Read(uint16) uint8
+	Write(uint16, uint8)
+	Ppu() io.Ppu
+	Vram() io.Vram
 }
 
-type defaultIo struct{}
-
-func (d defaultIo) Read(_ uint16) uint8 {
-	return 0xFF
+type bus struct {
+	bootrom io.Bootrom
+	vram    io.Vram
+	wram    io.Wram
+	hram    io.Hram
+	oam     io.Oam
+	ppu     io.Ppu
 }
 
-func (d defaultIo) Write(_ uint16, _ uint8) {}
-
-type Bus struct {
-	bootrom Io
-	vram    Io
-	wram    Io
-	hram    Io
-	oam     Io
-	ppu     Io
-}
-
-func NewBus(bootrom Io, vram Io, wram Io, hram Io, oam Io, ppu Io) *Bus {
-	return &Bus{
+func NewBus(bootrom io.Bootrom, vram io.Vram, wram io.Wram, hram io.Hram, oam io.Oam, ppu io.Ppu) Bus {
+	return &bus{
 		bootrom,
 		vram,
 		wram,
@@ -33,7 +29,7 @@ func NewBus(bootrom Io, vram Io, wram Io, hram Io, oam Io, ppu Io) *Bus {
 	}
 }
 
-func (b *Bus) find(addr uint16) Io {
+func (b *bus) find(addr uint16) io.Io {
 	switch {
 	case addr <= 0x00FF:
 		return b.bootrom
@@ -50,16 +46,24 @@ func (b *Bus) find(addr uint16) Io {
 	case 0xFF80 <= addr && addr <= 0xFFFE:
 		return b.hram
 	default:
-		return defaultIo{}
+		return io.DefaultIo{}
 	}
 }
 
-func (b *Bus) Read(addr uint16) uint8 {
+func (b *bus) Read(addr uint16) uint8 {
 	io := b.find(addr)
 	return io.Read(addr)
 }
 
-func (b *Bus) Write(addr uint16, val uint8) {
+func (b *bus) Write(addr uint16, val uint8) {
 	io := b.find(addr)
 	io.Write(addr, val)
+}
+
+func (b *bus) Ppu() io.Ppu {
+	return b.ppu
+}
+
+func (b *bus) Vram() io.Vram {
+	return b.vram
 }
