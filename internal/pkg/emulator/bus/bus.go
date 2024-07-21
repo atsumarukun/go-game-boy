@@ -34,10 +34,16 @@ func (b *bus) find(addr uint16) io.Io {
 	case addr <= 0x00FF:
 		return b.bootrom
 	case 0x8000 <= addr && addr <= 0x9FFF:
+		if b.ppu.Mode() == io.PPU_DRAWING_MODE {
+			panic("Cannot access vram.")
+		}
 		return b.vram
 	case 0xC000 <= addr && addr <= 0xDFFF:
 		return b.wram
 	case 0xFE00 <= addr && addr <= 0xFE9F:
+		if b.ppu.Mode() == io.PPU_OAM_SCAN_MODE || b.ppu.Mode() == io.PPU_DRAWING_MODE {
+			panic("Cannot access oam.")
+		}
 		return b.oam
 	case 0xFF40 <= addr && addr <= 0xFF4B:
 		return b.ppu

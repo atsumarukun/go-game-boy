@@ -5,8 +5,6 @@ import (
 	"github.com/atsumarukun/go-game-boy/internal/pkg/util/converter"
 )
 
-
-
 const (
 	BG_WINDOW_ENABLE          uint8 = 1 << 0
 	BG_TILE_MAP               uint8 = 1 << 3
@@ -30,17 +28,17 @@ type registers struct {
 	wx   uint8
 }
 
-type Mode int
+type PpuMode int
 
 const (
-	HBLANK Mode = iota
-	VBLANK
-	OAM_SCAN
-	DRAWING
+	PPU_HBLANK_MODE PpuMode = iota
+	PPU_VBLANK_MODE
+	PPU_OAM_SCAN_MODE
+	PPU_DRAWING_MODE
 )
 
 type context struct {
-	mode Mode
+	mode  PpuMode
 	cycle uint8
 }
 
@@ -48,6 +46,7 @@ type Ppu interface {
 	Read(uint16) uint8
 	Write(uint16, uint8)
 	Buffer() [lcd.WIDTH * lcd.HEIGHT]uint8
+	Mode() PpuMode
 	Emulate(Vram) bool
 }
 
@@ -60,7 +59,7 @@ type ppu struct {
 func NewPpu() Ppu {
 	return &ppu{
 		ctx: context{
-			mode: OAM_SCAN,
+			mode: PPU_OAM_SCAN_MODE,
 		},
 	}
 }
@@ -127,6 +126,10 @@ func (p *ppu) Buffer() [lcd.WIDTH * lcd.HEIGHT]uint8 {
 	return p.buffer
 }
 
+func (p *ppu) Mode() PpuMode {
+	return p.ctx.mode
+}
+
 func (p *ppu) Emulate(vram Vram) bool {
 	if p.regs.lcdc&PPU_ENABLE == 0 {
 		return false
@@ -139,33 +142,33 @@ func (p *ppu) Emulate(vram Vram) bool {
 
 	rendered := false
 	switch p.ctx.mode {
-	case HBLANK:
+	case PPU_HBLANK_MODE:
 		p.regs.ly += 1
 		if p.regs.ly < 144 {
-			p.ctx.mode = OAM_SCAN
+			p.ctx.mode = PPU_OAM_SCAN_MODE
 			p.ctx.cycle = 20
 		} else {
-			p.ctx.mode = VBLANK
+			p.ctx.mode = PPU_VBLANK_MODE
 			p.ctx.cycle = 114
 		}
 		p.checkLycEqLy()
-	case VBLANK:
+	case PPU_VBLANK_MODE:
 		p.regs.ly += 1
 		if p.regs.ly > 153 {
 			rendered = true
 			p.regs.ly = 0
-			p.ctx.mode = OAM_SCAN
+			p.ctx.mode = PPU_OAM_SCAN_MODE
 			p.ctx.cycle = 20
 		} else {
 			p.ctx.cycle = 114
 		}
 		p.checkLycEqLy()
-	case OAM_SCAN:
-		p.ctx.mode = DRAWING
+	case PPU_OAM_SCAN_MODE:
+		p.ctx.mode = PPU_DRAWING_MODE
 		p.ctx.cycle = 43
-	case DRAWING:
+	case PPU_DRAWING_MODE:
 		p.renderBg(vram)
-		p.ctx.mode = HBLANK
+		p.ctx.mode = PPU_HBLANK_MODE
 		p.ctx.cycle = 51
 	}
 	return rendered
